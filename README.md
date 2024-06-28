@@ -49,8 +49,8 @@ Implementing the techniques outlined in this project has demonstrated a signific
 
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/your-github-username/your-repo-name.git
-   cd your-repo-name
+   git clone https://github.com/mohsin-aslam/SelfOptimizingMLPipeline.git
+   cd SelfOptimizingMLPipeline
 
 2. **Set Up a Virtual Environment**
    ```bash
