@@ -91,7 +91,7 @@ This project is distributed under the MIT License. See the `LICENSE` file for mo
 
 ## Contact
 
-Your Email – m.mohsin.aslam@gmail.com
+Email – m.mohsin.aslam@gmail.com
 
 Project Presentation Link: https://docs.google.com/presentation/d/1u_i3r3l802wAO2RiYvlMopxcBvi3N3tvAYQuEQh4X2o/edit#slide=id.gc6fa3c898_0_0
 
