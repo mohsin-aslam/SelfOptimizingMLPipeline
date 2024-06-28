@@ -1,0 +1,74 @@
+version: '3'
+
+networks:
+    airflow_network:
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 172.27.0.0/24
+
+services:            
+    webserver:
+        build: &airflow_build
+          context: .
+          dockerfile: Dockerfile
+        restart: always
+        volumes:
+            - webserver_data:/usr/local/airflow
+            - ./airflow_data/dags:/usr/local/airflow/dags
+            - ./airflow_data/logs:/usr/local/airflow/logs
+            - ./config/airflow.cfg:/usr/local/airflow/airflow.cfg
+        networks:
+            - airflow_network
+        ports:
+            - "8080:8080"
+        command: webserver
+        healthcheck:
+            test: ["CMD-SHELL", "curl --fail http://localhost:8080/health || exit 1"]
+            interval: 600s
+            timeout: 600s
+            retries: 3
+
+    flower:
+        build:
+            <<: *airflow_build
+        restart: always
+        environment:
+            - EXECUTOR=${EXECUTOR}
+        networks:
+            - airflow_network
+        ports:
+            - "5555:5555"
+        command: flower
+
+    scheduler:
+        build:
+            <<: *airflow_build
+        restart: always
+        depends_on:
+            - webserver
+        volumes:
+            - ./airflow_data/dags:/usr/local/airflow/dags
+            - ./airflow_data/logs:/usr/local/airflow/logs
+            - ./config/airflow.cfg:/usr/local/airflow/airflow.cfg
+        networks:
+            - airflow_network
+        command: scheduler
+
+    worker:
+        build:
+            <<: *airflow_build
+        depends_on:
+            - scheduler
+        volumes:
+            - ./airflow_data/dags:/usr/local/airflow/dags
+            - ./airflow_data/logs:/usr/local/airflow/logs
+            - ./config/airflow.cfg:/usr/local/airflow/airflow.cfg
+        networks:
+            - airflow_network
+        command: worker
+
+volumes:
+    webserver_data:
+        driver: local
+        name: airflow_webserver

@@ -1,0 +1,121 @@
+version: '3.7'
+
+# networks:
+#   shared_mlops_network:
+#     external: true
+networks:
+    purevpn_network:
+        driver: bridge
+        name: purevpn_network
+        ipam:
+            config:
+                - subnet: 172.27.0.0/24
+
+services:
+  minio:  
+    restart: always
+    image: minio/minio@sha256:da8a5f5af44b92e6ebdde0d0683a88e4719c0ab2f33186882a0bb9b49bd448f7
+    container_name: mlflow_s3
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    command: server /data --console-address ':9001' --address ':9000'
+    environment:  
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio_data:/data
+    networks:
+      - purevpn_network
+
+  mc:
+    restart: always
+    image: minio/minio@sha256:da8a5f5af44b92e6ebdde0d0683a88e4719c0ab2f33186882a0bb9b49bd448f7
+    depends_on:
+      - minio
+    container_name: mc
+    entrypoint: >
+      /bin/sh -c "
+      /tmp/wait-for-it.sh minio:9000 &&
+      /usr/bin/mc alias set minio http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} &&
+      /usr/bin/mc mb minio/mlflow;
+      exit 0;
+      "
+    volumes:
+      - ./wait-for-it.sh:/tmp/wait-for-it.sh
+    networks:
+      - purevpn_network
+
+  # db:
+  #   restart: always
+  #   image: postgres:15.4
+  #   container_name: mlflow_db
+  #   ports:
+  #     - "5432:5432"
+  #   environment:
+  #     - POSTGRES_DB=${POSTGRES_DB}
+  #     - POSTGRES_USER=${POSTGRES_USER}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+  #   volumes:
+  #     - dbdata:/var/lib/postgresql/data
+  #   networks:
+  #     - purevpn_network
+
+  web:
+    restart: always
+    build: ./docker/mlflow
+    image: mlflow_server
+    container_name: mlflow_server
+    depends_on:
+      - mc
+      # - db
+    ports:
+      - "5000:5000"
+    environment:
+      - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
+      - AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER}
+      - AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD}
+    command: mlflow server --backend-store-uri postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB} --default-artifact-root s3://mlflow/ --host 0.0.0.0
+    volumes:
+      - mlflow_data:/mlflow
+    networks:
+      - purevpn_network
+
+  jupyter:
+    build: ./docker/jupyter
+    image: jupyter_notebook
+    container_name: jupyter_notebook
+    restart: always
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./notebooks:/home/jovyan/notebooks
+      - ./tfx_pipelines:/home/jovyan/tfx_pipelines
+      - ./data:/home/jovyan/data
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - JUPYTER_TOKEN=${JUPYTER_TOKEN}
+      - AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER}
+      - AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD}
+      - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
+      - MLFLOW_TRACKING_URI=http://mlflow_server:5000
+    networks:
+      - purevpn_network
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #       - driver: nvidia
+    #         count: 1
+    #         capabilities: [gpu]
+
+volumes:
+  # dbdata:
+  #   driver: local
+  #   name: dbdata
+  minio_data:
+    driver: local
+    name: minio_data
+  mlflow_data:
+    driver: local
+    name: dbdata

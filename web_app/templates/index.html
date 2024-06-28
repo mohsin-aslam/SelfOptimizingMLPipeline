@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Model Prediction</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            width: 195vh;
+            overflow: hidden;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+        }
+        .header {
+            background-color: #4a47a3;
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        .scrollable-table {
+            overflow: auto;
+            max-height: 80%;
+        }
+        table {
+            width: 100%;
+            margin-bottom: 0;
+        }
+        h1, h2 {
+            margin: 0 0 20px 0;
+        }
+        label {
+            font-weight: bold;
+        }
+        .btn-primary, .btn-secondary {
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn-primary {
+            background-color: #4a47a3;
+        }
+        .btn-primary:hover {
+            background-color: #42408a;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        th {
+            position: sticky;
+            top: 0;
+            background-color: #fff;
+        }
+        table {
+            margin-top: 20px;
+            width: 100%;
+        }
+        .last-column {
+            background-color: yellow;
+            color: black;
+            font-weight: bold;
+        }
+        @media (min-width: 1800px) {
+            .container {
+                width: 1800px;
+                max-width: none;
+            }
+        }
+        .btn-primary:focus, .btn-primary:active,
+        .btn-secondary:focus, .btn-secondary:active {
+            outline: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1), 0 0 0 0.2rem rgba(108,117,125,.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>MS Project: Fare Prediction</h1>
+        </div>
+        <form action="/predict" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="csvfile">Select CSV File:</label>
+                <input type="file" class="form-control-file" id="csvfile" name="csvfile" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Predict</button>
+            <a href="/evaluate" class="btn btn-secondary">Evaluate</a>
+        </form>
+        {% if table %}
+            <div class="scrollable-table">
+                {{ table|safe }}
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

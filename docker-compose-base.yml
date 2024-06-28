@@ -1,0 +1,134 @@
+version: '3'
+
+networks:
+    purevpn_network:
+        driver: bridge
+        name: purevpn_network
+        ipam:
+            config:
+                - subnet: 172.27.0.0/24
+
+services:
+    redis:
+        image: 'redis:7.2.1'
+        command: redis-server --requirepass ${REDIS_PASSWORD}
+        restart: always
+        volumes:
+            - redis_data:/data
+            - ./docker/redis/redis.conf:/etc/redis/redis.conf
+        networks:
+            - purevpn_network
+
+    postgres:
+        image: postgres:15.4
+        environment:
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+            - POSTGRES_DB=${POSTGRES_DB}
+            - PGDATA=${PGDATA}
+        restart: always
+        volumes:
+            - postgres_data:/var/lib/postgresql/data/pgdata
+        networks:
+            - purevpn_network
+        ports:
+            - "5432:5432"
+
+    rabbitmq:
+        command:  bash -c "rabbitmq-plugins enable rabbitmq_management; rabbitmq-server;"
+        container_name: airflow_rabbitmq
+        hostname: rabbitmq
+        image: rabbitmq:3-management
+        restart: always
+        env_file:
+            - ./config/rabbitmq/env/.env
+        networks:
+            - purevpn_network
+        ports:
+            - "15672:15672"
+            - "5672:5672"
+        volumes:
+            - ./config/rabbitmq/config/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+            - ./config/rabbitmq/config/definitions.json:/etc/rabbitmq/definitions.json
+            - rabbitmq_data:/var/lib/rabbitmq/
+            
+    webserver:
+        build: &airflow_build
+          context: .
+          dockerfile: Dockerfile
+        restart: always
+        depends_on:
+            - postgres
+            - redis
+        volumes:
+            - webserver_data:/usr/local/airflow
+            - ./airflow_data/dags:/usr/local/airflow/dags
+            - ./airflow_data/logs:/usr/local/airflow/logs
+            - ./config/airflow.cfg:/usr/local/airflow/airflow.cfg
+        networks:
+            - purevpn_network
+        ports:
+            - "8080:8080"
+        command: webserver
+        healthcheck:
+            test: ["CMD-SHELL", "curl --fail http://localhost:8080/health || exit 1"]
+            interval: 30s
+            timeout: 30s
+            retries: 3
+
+    flower:
+        build:
+            <<: *airflow_build
+        restart: always
+        depends_on:
+            - redis
+        environment:
+            - EXECUTOR=${EXECUTOR}
+            - REDIS_PASSWORD=${REDIS_PASSWORD}
+        networks:
+            - purevpn_network
+        ports:
+            - "5555:5555"
+        command: flower
+
+    scheduler:
+        build:
+            <<: *airflow_build
+        restart: always
+        depends_on:
+            - webserver
+        volumes:
+            - ./airflow_data/dags:/usr/local/airflow/dags
+            - ./airflow_data/logs:/usr/local/airflow/logs
+            - ./config/airflow.cfg:/usr/local/airflow/airflow.cfg
+        networks:
+            - purevpn_network
+        command: scheduler
+
+    worker:
+        restart: always
+        build:
+            <<: *airflow_build
+        depends_on:
+            - scheduler
+        volumes:
+            - ./airflow_data/dags:/usr/local/airflow/dags
+            - ./airflow_data/logs:/usr/local/airflow/logs
+            - ./config/airflow.cfg:/usr/local/airflow/airflow.cfg
+        networks:
+            - purevpn_network
+        command: worker
+
+volumes:
+    postgres_data:
+        driver: local
+        name: airflow_postgres
+    redis_data:
+        driver: local
+        name: airflow_redis
+    rabbitmq_data:
+        driver: local
+        name: airflow_rabbitmq
+    webserver_data:
+        driver: local
+        name: airflow_webserver

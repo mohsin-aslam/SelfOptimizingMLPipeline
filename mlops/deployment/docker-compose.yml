@@ -1,0 +1,52 @@
+version: '3.7'
+
+# networks:
+#   shared_mlops_network:
+#     external: true
+
+networks:
+    purevpn_network:
+        driver: bridge
+        name: purevpn_network
+        ipam:
+            config:
+                - subnet: 172.27.0.0/24
+
+services:
+  tensorflow_serving:
+    restart: always
+    image: tensorflow/serving
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./models:/models
+    environment:
+      - MODEL_NAME=${MODEL_NAME}
+    command: --model_base_path=/models/${MODEL_NAME} --model_name=${MODEL_NAME}
+    networks:
+      - purevpn_network
+
+  model_updater:
+    restart: always
+    build: ../docker/mlflow
+    image: mlflow_server
+    container_name: mlflow_model
+    volumes:
+      - ./models:/models
+      - ./scripts:/scripts
+    environment:
+      - MODEL_NAME=${MODEL_NAME}
+      - TAG_KEY=${TAG_KEY}
+      - TAG_VALUE=${TAG_VALUE}
+      - MLFLOW_TRACKING_URI=${MLFLOW_TRACKING_URI}
+      - MLFLOW_S3_ENDPOINT_URL=${MLFLOW_S3_ENDPOINT_URL}
+      - AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER}
+      - AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD}
+    entrypoint: ["python", "/scripts/update_model.py", "${MODEL_NAME}", "--save_directory", "/models"]
+    depends_on:
+      - tensorflow_serving
+    networks:
+      - purevpn_network
+
+volumes:
+  model:

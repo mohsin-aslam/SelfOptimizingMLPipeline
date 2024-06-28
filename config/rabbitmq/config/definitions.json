@@ -1,0 +1,35 @@
+{
+    "users": [
+        {
+            "name": "root",
+            "password": "root",
+            "tags": "administrator"
+        }
+    ],
+
+    "vhosts": [
+        {
+            "name": "/"
+        }
+    ],
+
+    "permissions": [
+        {
+            "user": "root",
+            "vhost": "/",
+            "configure": ".*",
+            "write": ".*",
+            "read": ".*"
+        }
+    ],
+
+    "parameters": [],
+
+    "policies": [],
+
+    "exchanges": [],
+
+    "queues": [],
+
+    "bindings": []
+}

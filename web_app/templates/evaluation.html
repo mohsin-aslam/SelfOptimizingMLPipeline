@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Model Evaluation</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            max-width: 800px;
+            margin: auto;
+        }
+        h1, h2 {
+            margin: 0 0 20px 0;
+        }
+        .metric {
+            font-weight: bold;
+        }
+        .metric-value {
+            font-size: 1.2em;
+            color: #007bff;
+        }
+        .plot {
+            margin-bottom: 20px;
+        }
+        .btn-primary {
+            background-color: #4a47a3;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn-primary:hover {
+            background-color: #42408a;
+        }
+        .btn-primary:focus, .btn-primary:active {
+            outline: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1), 0 0 0 0.2rem rgba(108,117,125,.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Model Evaluation</h1>
+        <p class="metric">Mean Absolute Error (MAE): <span class="metric-value">{{ mae }}</span></p>
+        <p class="metric">Mean Squared Error (MSE): <span class="metric-value">{{ mse }}</span></p>
+        <p class="metric">Root Mean Squared Error (RMSE): <span class="metric-value">{{ rmse }}</span></p>
+        <p class="metric">R-squared (R²): <span class="metric-value">{{ r2 }}</span></p>
+
+        <h2>Residual Plot</h2>
+        <div class="plot">
+            <img src="data:image/png;base64,{{ residual_plot_url }}" alt="Residual Plot" class="img-fluid">
+        </div>
+
+        <h2>Predicted vs Actual Plot</h2>
+        <div class="plot">
+            <img src="data:image/png;base64,{{ pred_vs_actual_plot_url }}" alt="Predicted vs Actual Plot" class="img-fluid">
+        </div>
+
+        <h2>Distribution of Residuals</h2>
+        <div class="plot">
+            <img src="data:image/png;base64,{{ residuals_dist_plot_url }}" alt="Distribution of Residuals" class="img-fluid">
+        </div>
+
+        <a href="/" class="btn btn-primary">Go Back</a>
+    </div>
+</body>
+</html>
