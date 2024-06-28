@@ -1,4 +1,4 @@
-# SelfOptimizingMLPipeline
+# Self Optimizing ML Pipeline
 
 ## Project Overview
 
@@ -30,7 +30,9 @@ This project develops a robust machine learning pipeline for fare prediction in 
 
 ![Alt text](resources/arch.png)
 
-## Output Results
+## Output 
+
+Implementing the techniques outlined in this project has demonstrated a significant enhancement, with results showing an approximate 30% improvement in model performance compared to traditional machine learning models without these optimizations. This underscores the effectiveness of our advanced methodologies in real-world scenarios.
 
 ![Alt text](resources/results.png)
 
@@ -56,12 +58,12 @@ This project develops a robust machine learning pipeline for fare prediction in 
    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
 
 3. **Airflow Dependencies**
-   ```bash
+
    See [Airflow Setup Details](./ReadMe.md) for more information on configuring your airflow environment.
 
 
 4. **MLFlow Dependencies**
-   ```bash
+
    See [MLFlow Setup Details](./mlops/ReadMe.md) for more information on configuring your mlflow environment.
 
 ## Usage
@@ -89,7 +91,7 @@ This project is distributed under the MIT License. See the `LICENSE` file for mo
 
 ## Contact
 
-Your Name – m.mohsin.aslam@gmail.com
+Your Email – m.mohsin.aslam@gmail.com
 
 Project Presentation Link: https://docs.google.com/presentation/d/1u_i3r3l802wAO2RiYvlMopxcBvi3N3tvAYQuEQh4X2o/edit#slide=id.gc6fa3c898_0_0
 
