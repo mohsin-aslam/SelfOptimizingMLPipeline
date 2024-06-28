@@ -12,7 +12,7 @@ This project develops a robust machine learning pipeline for fare prediction in 
 - **Experiment Tracking**: Utilizes MLflow for tracking experiments, managing models, and facilitating easy comparison of model versions.
 - **Model Storage and Serving**: Models are stored and versioned in MinIO, with a Flask web application serving real-time predictions.
 
-![Alt text](resources/stack.png)
+![Alt text](resources/ml.png)
 
 ## Technologies Used
 
@@ -22,8 +22,9 @@ This project develops a robust machine learning pipeline for fare prediction in 
 - **MinIO**: Provides efficient model storage and management.
 - **Flask**: Creates a user-friendly web application for model inference.
 - **Streamlit**: Facilitates interactive data visualization and reporting.
+- **Docker**: Complete architecture is dockerized, which helps in development and deployment of the project.  
 
-![Alt text](resources/ml.png)
+![Alt text](resources/stack.png)
 
 ## Architecture
 
